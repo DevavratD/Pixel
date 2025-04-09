@@ -25,6 +25,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
+interface GalleryImage {
+  id: number;
+  title: string;
+  url: string;
+  uploadedBy: string;
+  uploadDate: string;
+  description?: string;
+}
+
+interface BudgetEntry {
+  id: number;
+  category: string;
+  amount: number;
+  type: 'income' | 'expense';
+  description: string;
+  date: string;
+  addedBy: string;
+}
+
 interface CommitteeMember {
   id: number;
   name: string;
@@ -33,6 +52,7 @@ interface CommitteeMember {
   phone: string;
   image: string;
   department: string;
+  isAdmin: boolean;
 }
 
 interface Event {
@@ -87,7 +107,8 @@ const AdminDashboard = () => {
       email: "john@example.com",
       phone: "1234567890",
       image: "/committee/john.jpg",
-      department: "Computer Science"
+      department: "Computer Science",
+      isAdmin: true
     }
   ]);
 
@@ -110,13 +131,32 @@ const AdminDashboard = () => {
     email: '',
     phone: '',
     image: '',
-    department: ''
+    department: '',
+    isAdmin: true
   });
 
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [isCommitteeDialogOpen, setIsCommitteeDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [editingMember, setEditingMember] = useState<CommitteeMember | null>(null);
+
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [budgetEntries, setBudgetEntries] = useState<BudgetEntry[]>([]);
+  const [newImage, setNewImage] = useState<Omit<GalleryImage, 'id'>>({
+    title: '',
+    url: '',
+    uploadedBy: '',
+    uploadDate: new Date().toISOString(),
+    description: ''
+  });
+  const [newBudgetEntry, setNewBudgetEntry] = useState<Omit<BudgetEntry, 'id'>>({
+    category: '',
+    amount: 0,
+    type: 'expense',
+    description: '',
+    date: new Date().toISOString(),
+    addedBy: ''
+  });
 
   // Event handlers
   const handleAddEvent = () => {
@@ -172,7 +212,8 @@ const AdminDashboard = () => {
       email: '',
       phone: '',
       image: '',
-      department: ''
+      department: '',
+      isAdmin: true
     });
     setIsCommitteeDialogOpen(false);
   };
@@ -192,6 +233,56 @@ const AdminDashboard = () => {
   const totalBudget = events.reduce((sum, event) => sum + event.budget, 0);
   const totalAttendees = events.reduce((sum, event) => sum + event.attendees, 0);
   const activeEvents = events.filter(event => event.status === 'open').length;
+
+  const handleAddImage = () => {
+    const image: GalleryImage = {
+      ...newImage,
+      id: galleryImages.length + 1
+    };
+    setGalleryImages([...galleryImages, image]);
+    setNewImage({
+      title: '',
+      url: '',
+      uploadedBy: '',
+      uploadDate: new Date().toISOString(),
+      description: ''
+    });
+  };
+
+  const handleDeleteImage = (id: number) => {
+    setGalleryImages(galleryImages.filter(img => img.id !== id));
+  };
+
+  const handleAddBudgetEntry = () => {
+    const entry: BudgetEntry = {
+      ...newBudgetEntry,
+      id: budgetEntries.length + 1
+    };
+    setBudgetEntries([...budgetEntries, entry]);
+    setNewBudgetEntry({
+      category: '',
+      amount: 0,
+      type: 'expense',
+      description: '',
+      date: new Date().toISOString(),
+      addedBy: ''
+    });
+  };
+
+  const handleDeleteBudgetEntry = (id: number) => {
+    setBudgetEntries(budgetEntries.filter(entry => entry.id !== id));
+  };
+
+  // Calculate budget statistics
+  const totalIncome = budgetEntries
+    .filter(entry => entry.type === 'income')
+    .reduce((sum, entry) => sum + entry.amount, 0);
+
+  const totalExpenses = budgetEntries
+    .filter(entry => entry.type === 'expense')
+    .reduce((sum, entry) => sum + entry.amount, 0);
+
+  const currentBalance = totalIncome - totalExpenses;
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -281,15 +372,23 @@ const AdminDashboard = () => {
         </div>
 
         {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="events" className="data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue">
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid grid-cols-4 gap-4 bg-background/95 p-1">
+            <TabsTrigger value="events" className="data-[state=active]:bg-neon-blue/10">
               <Calendar className="h-4 w-4 mr-2" />
               Events
             </TabsTrigger>
-            <TabsTrigger value="committee" className="data-[state=active]:bg-neon-purple/10 data-[state=active]:text-neon-purple">
+            <TabsTrigger value="committee" className="data-[state=active]:bg-neon-purple/10">
               <Users className="h-4 w-4 mr-2" />
               Committee
+            </TabsTrigger>
+            <TabsTrigger value="gallery" className="data-[state=active]:bg-neon-green/10">
+              <ImageIcon className="h-4 w-4 mr-2" />
+              Gallery
+            </TabsTrigger>
+            <TabsTrigger value="budget" className="data-[state=active]:bg-neon-yellow/10">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Budget
             </TabsTrigger>
           </TabsList>
 
@@ -718,6 +817,206 @@ const AdminDashboard = () => {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="gallery" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Gallery Management</h2>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="bg-neon-green/10 text-neon-green hover:bg-neon-green/20">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Image
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Image</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        id="title"
+                        value={newImage.title}
+                        onChange={(e) => setNewImage({ ...newImage, title: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="imageUrl">Image URL</Label>
+                      <Input
+                        id="imageUrl"
+                        value={newImage.url}
+                        onChange={(e) => setNewImage({ ...newImage, url: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={newImage.description}
+                        onChange={(e) => setNewImage({ ...newImage, description: e.target.value })}
+                      />
+                    </div>
+                    <Button onClick={handleAddImage} className="w-full">Add Image</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {galleryImages.map((image) => (
+                <Card key={image.id} className="overflow-hidden">
+                  <img src={image.url} alt={image.title} className="w-full h-48 object-cover" />
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold">{image.title}</h3>
+                    <p className="text-sm text-muted-foreground">{image.description}</p>
+                    <div className="flex justify-between items-center mt-4">
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(image.uploadDate).toLocaleDateString()}
+                      </span>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteImage(image.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="budget" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Total Income</CardTitle>
+                  <CardDescription>All time income</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-green-500">₹{totalIncome.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Total Expenses</CardTitle>
+                  <CardDescription>All time expenses</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-red-500">₹{totalExpenses.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Balance</CardTitle>
+                  <CardDescription>Available funds</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className={`text-2xl font-bold ${currentBalance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    ₹{currentBalance.toLocaleString()}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Budget Entries</h2>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="bg-neon-yellow/10 text-neon-yellow hover:bg-neon-yellow/20">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Entry
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Budget Entry</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Input
+                        id="category"
+                        value={newBudgetEntry.category}
+                        onChange={(e) => setNewBudgetEntry({ ...newBudgetEntry, category: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="amount">Amount</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        value={newBudgetEntry.amount}
+                        onChange={(e) => setNewBudgetEntry({ ...newBudgetEntry, amount: parseFloat(e.target.value) })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="type">Type</Label>
+                      <select
+                        id="type"
+                        value={newBudgetEntry.type}
+                        onChange={(e) => setNewBudgetEntry({ ...newBudgetEntry, type: e.target.value as 'income' | 'expense' })}
+                        className="w-full p-2 border rounded-md"
+                      >
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={newBudgetEntry.description}
+                        onChange={(e) => setNewBudgetEntry({ ...newBudgetEntry, description: e.target.value })}
+                      />
+                    </div>
+                    <Button onClick={handleAddBudgetEntry} className="w-full">Add Entry</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {budgetEntries.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{entry.category}</TableCell>
+                    <TableCell>
+                      <Badge variant={entry.type === 'income' ? 'success' : 'destructive'}>
+                        {entry.type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className={entry.type === 'income' ? 'text-green-500' : 'text-red-500'}>
+                      ₹{entry.amount.toLocaleString()}
+                    </TableCell>
+                    <TableCell>{entry.description}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteBudgetEntry(entry.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </TabsContent>
         </Tabs>
       </div>

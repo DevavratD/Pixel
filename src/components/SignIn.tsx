@@ -28,7 +28,7 @@ const SignIn: React.FC = () => {
     <div className="relative min-h-screen">
       <ThreeDBackground />
       <Navbar />
-      <div className=" font-helvetica relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="font-helvetica relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8 bg-background/80 backdrop-blur-xl p-8 rounded-xl border border-border/50 shadow-lg">
           <div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
@@ -82,6 +82,26 @@ const SignIn: React.FC = () => {
               >
                 Sign in
               </button>
+            </div>
+
+            <div className="mt-4 text-center text-sm space-y-2">
+              <p className="text-foreground/70">Are you a member or admin?</p>
+              <div className="flex justify-center space-x-4">
+                <button
+                  type="button"
+                  onClick={() => navigate('/member/login')}
+                  className="text-neon-purple hover:text-neon-purple/80 underline"
+                >
+                  Member Login
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/admin/login')}
+                  className="text-neon-green hover:text-neon-green/80 underline"
+                >
+                  Admin Login
+                </button>
+              </div>
             </div>
           </form>
         </div>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { 
-  Menu, X, Zap, Users, Calendar, LayoutDashboard, 
+import {
+  Menu, X, Zap, Users, Calendar, LayoutDashboard,
   ChevronRight, ExternalLink, ChevronDown, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,7 @@ const Navbar = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Handle scroll effects
   useEffect(() => {
     const handleScroll = () => {
@@ -25,7 +25,7 @@ const Navbar = () => {
         setScrolled(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -38,12 +38,12 @@ const Navbar = () => {
         setIsOpen(false);
       }
     };
-    
+
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isOpen]);
 
-  const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
+  const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup' || location.pathname === '/admin/login' || location.pathname === '/member/login';
 
   const events = [
     {
@@ -108,7 +108,7 @@ const Navbar = () => {
             Home
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-neon-blue group-hover:w-full transition-all duration-300"></span>
           </Link>
-          
+
           <div className="relative">
             <button
               onClick={() => setShowEvents(!showEvents)}
@@ -118,7 +118,7 @@ const Navbar = () => {
               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${showEvents ? 'rotate-180' : ''}`} />
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-neon-blue group-hover:w-full transition-all duration-300"></span>
             </button>
-            
+
             {/* Events Dropdown */}
             <AnimatePresence>
               {showEvents && (
@@ -217,14 +217,37 @@ const Navbar = () => {
 
         {!isAuthPage && (
           <div className="hidden md:flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              className="border-neon-blue/50 text-neon-blue hover:bg-neon-blue/10 hover:text-neon-blue font-helvetica"
-              onClick={() => navigate('/signin')}
-            >
-              Sign In
-            </Button>
-            <Button 
+            <div className="relative group">
+              <Button
+                variant="outline"
+                className="border-neon-blue/50 text-neon-blue hover:bg-neon-blue/10 hover:text-neon-blue font-helvetica"
+              >
+                Sign In <ChevronDown className="ml-1 h-4 w-4" />
+              </Button>
+              <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-background/95 backdrop-blur-xl border border-border/50 overflow-hidden transition-all duration-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible z-50">
+                <div className="py-1">
+                  <Link
+                    to="/signin"
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-neon-blue/10 hover:text-neon-blue"
+                  >
+                    Regular Sign In
+                  </Link>
+                  <Link
+                    to="/member/login"
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-neon-purple/10 hover:text-neon-purple"
+                  >
+                    Member Login
+                  </Link>
+                  <Link
+                    to="/admin/login"
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-neon-green/10 hover:text-neon-green"
+                  >
+                    Admin Login
+                  </Link>
+                </div>
+              </div>
+            </div>
+            <Button
               className="relative overflow-hidden group font-helvetica font-bold"
               onClick={() => navigate('/signup')}
             >
@@ -253,7 +276,7 @@ const Navbar = () => {
       {/* Mobile Navigation - Animated Full Screen */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             className="md:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-xl"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -273,10 +296,10 @@ const Navbar = () => {
                   <X className="h-7 w-7 text-neon-blue" />
                 </button>
               </div>
-              
+
               <nav className="flex-1 flex flex-col items-center justify-center space-y-8">
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   className="group flex items-center text-3xl font-bold w-full justify-center font-helvetica"
                   onClick={() => setIsOpen(false)}
                 >
@@ -293,20 +316,20 @@ const Navbar = () => {
                     <ChevronRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </motion.div>
                 </Link>
-                
-                <Link 
-                  to="/events" 
+
+                <Link
+                  to="/events"
                   className="group flex items-center text-3xl font-bold w-full justify-center font-helvetica"
                   onClick={() => setIsOpen(false)}
                 >
-                    <span className="relative">
-                      Events
-                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-neon-purple group-hover:w-full transition-all duration-300"></span>
-                    </span>
+                  <span className="relative">
+                    Events
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-neon-purple group-hover:w-full transition-all duration-300"></span>
+                  </span>
                 </Link>
-                
-                <Link 
-                  to="/highlights" 
+
+                <Link
+                  to="/highlights"
                   className="group flex items-center text-3xl font-bold w-full justify-center font-helvetica"
                   onClick={() => setIsOpen(false)}
                 >
@@ -323,9 +346,9 @@ const Navbar = () => {
                     <ChevronRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </motion.div>
                 </Link>
-                
-                <Link 
-                  to="/about" 
+
+                <Link
+                  to="/about"
                   className="group flex items-center text-3xl font-bold w-full justify-center font-helvetica"
                   onClick={() => setIsOpen(false)}
                 >
@@ -343,8 +366,8 @@ const Navbar = () => {
                   </motion.div>
                 </Link>
 
-                <Link 
-                  to="/join" 
+                <Link
+                  to="/join"
                   className="group flex items-center text-3xl font-bold w-full justify-center font-helvetica"
                   onClick={() => setIsOpen(false)}
                 >
@@ -421,17 +444,39 @@ const Navbar = () => {
 
                 {!isAuthPage && (
                   <div className="flex flex-col gap-4 w-full max-w-xs mt-8">
-                    <Button 
-                      variant="outline" 
-                      className="border-neon-blue/50 text-neon-blue hover:bg-neon-blue/10 hover:text-neon-blue font-helvetica"
-                      onClick={() => {
-                        navigate('/signin');
-                        setIsOpen(false);
-                      }}
-                    >
-                      Sign In
-                    </Button>
-                    <Button 
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        className="w-full border-neon-blue/50 text-neon-blue hover:bg-neon-blue/10 hover:text-neon-blue font-helvetica"
+                        onClick={() => {
+                          navigate('/signin');
+                          setIsOpen(false);
+                        }}
+                      >
+                        Regular Sign In
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full border-neon-purple/50 text-neon-purple hover:bg-neon-purple/10 hover:text-neon-purple font-helvetica"
+                        onClick={() => {
+                          navigate('/member/login');
+                          setIsOpen(false);
+                        }}
+                      >
+                        Member Login
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full border-neon-green/50 text-neon-green hover:bg-neon-green/10 hover:text-neon-green font-helvetica"
+                        onClick={() => {
+                          navigate('/admin/login');
+                          setIsOpen(false);
+                        }}
+                      >
+                        Admin Login
+                      </Button>
+                    </div>
+                    <Button
                       className="relative overflow-hidden group font-helvetica font-bold"
                       onClick={() => {
                         navigate('/signup');
