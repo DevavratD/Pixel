@@ -209,6 +209,10 @@ const Navbar = () => {
             About Us
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-neon-blue group-hover:w-full transition-all duration-300"></span>
           </Link>
+          <Link to="/leaderboard" className="text-base font-medium tracking-wide text-foreground hover:text-neon-blue transition-colors relative group font-helvetica">
+            Leaderboard
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-neon-blue group-hover:w-full transition-all duration-300"></span>
+          </Link>
           {/* <Link to="/join" className="text-base font-medium tracking-wide text-foreground hover:text-neon-blue transition-colors relative group font-helvetica">
             Join Community
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-neon-blue group-hover:w-full transition-all duration-300"></span>
@@ -361,6 +365,25 @@ const Navbar = () => {
                     <span className="relative">
                       About Us
                       <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-neon-green group-hover:w-full transition-all duration-300"></span>
+                    </span>
+                    <ChevronRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </motion.div>
+                </Link>
+
+                <Link
+                  to="/leaderboard"
+                  className="group flex items-center text-3xl font-bold w-full justify-center font-helvetica"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <motion.div
+                    className="flex items-center gap-2"
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <span className="relative">
+                      Leaderboard
+                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-neon-blue group-hover:w-full transition-all duration-300"></span>
                     </span>
                     <ChevronRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </motion.div>

@@ -15,6 +15,7 @@ import AdminLogin from './pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard';
 import MemberLogin from './pages/member/Login';
 import MemberDashboard from './pages/member/Dashboard';
+import Leaderboard from './pages/Leaderboard';
 import AllEvents from './pages/AllEvents';
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/member/login" element={<MemberLogin />} />
           <Route path="/member/dashboard" element={<MemberDashboard />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
